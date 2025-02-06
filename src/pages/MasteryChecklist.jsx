@@ -29,7 +29,8 @@ function MasteryChecklist(props) {
 		setDrifterIntrinsics,
 		setHideMastered,
 		setHideFounders,
-		displayingNodes
+		displayingNodes,
+		setGameSyncInfo
 	} = useStore(state => ({
 		setId: state.setId,
 		setType: state.setType,
@@ -42,7 +43,8 @@ function MasteryChecklist(props) {
 		setDrifterIntrinsics: state.setDrifterIntrinsics,
 		setHideMastered: state.setHideMastered,
 		setHideFounders: state.setHideFounders,
-		displayingNodes: state.displayingNodes
+		displayingNodes: state.displayingNodes,
+		setGameSyncInfo: state.setGameSyncInfo
 	}));
 
 	const [dataLoading, setDataLoading] = useState(true);
@@ -75,20 +77,25 @@ function MasteryChecklist(props) {
 				setNodesMastered(data?.steelPath ?? [], true);
 				setJunctionsMastered(data?.starChartJunctions ?? [], false);
 				setJunctionsMastered(data?.steelPathJunctions ?? [], true);
+				setGameSyncInfo(data?.gameSyncUsername, data?.gameSyncPlatform);
 
 				setDataLoading(false);
 			}
 		);
 	}, [id, props.type]); //eslint-disable-line
 
-	const { items, fetchData } = useStore(state => ({
+	const { items, fetchData, gameSync } = useStore(state => ({
 		items: state.items,
-		fetchData: state.fetchData
+		fetchData: state.fetchData,
+		gameSync: state.gameSync
 	}));
 	const itemsLoading = Object.keys(items).length === 0;
 	useEffect(() => {
 		fetchData();
-	}, []); //eslint-disable-line
+	}, [fetchData]);
+	useEffect(() => {
+		if (!dataLoading && !itemsLoading) gameSync();
+	}, [dataLoading, itemsLoading, gameSync]);
 
 	return dataLoading || itemsLoading ? (
 		<LoadingScreen />
@@ -117,3 +124,4 @@ MasteryChecklist.propTypes = {
 };
 
 export default MasteryChecklist;
+
